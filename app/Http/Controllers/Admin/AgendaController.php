@@ -8,63 +8,62 @@ use Illuminate\Http\Request;
 
 class AgendaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return response()->json(Agenda::all());
+        $agendas = Agenda::paginate(10);
+        return view('admin.agendas.index', compact('agendas'));
     }
 
+    public function create()
+    {
+        return view('admin.agendas.create');
+    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-       $data = $request->validate([
-           'title' => 'required|string',
-           'description' => 'nullable|string',
-           'start_time' => 'required|date',
-           'end_time' => 'required|date|after_or_equal:start_time',
-           'location' => 'nullable|string',
-            'language' => 'nullable|string'
-       ]);
-       Agenda::create($data);   
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'speaker' => 'nullable|string|max:255',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'day' => 'nullable|string',
+            'language' => 'nullable|string|max:5'
+        ]);
+
+        Agenda::create($validated);
+        return redirect()->route('agendas.index')->with('success', 'Agenda created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Agenda $agenda)
     {
-        return $agenda;
+        return view('admin.agendas.show', compact('agenda'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Agenda $agenda)
     {
-        //
+        return view('admin.agendas.edit', compact('agenda'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update( $request, Agenda $agenda)
+    public function update(Request $request, Agenda $agenda)
     {
-      $agenda->update($request->all());
-      return $agenda;
-       
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'speaker' => 'nullable|string|max:255',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'day' => 'nullable|string',
+            'language' => 'nullable|string|max:5'
+        ]);
+
+        $agenda->update($validated);
+        return redirect()->route('agendas.index')->with('success', 'Agenda updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Agenda $agenda)
     {
         $agenda->delete();
-        return response()->noContent();
+        return redirect()->route('agendas.index')->with('success', 'Agenda deleted successfully');
     }
 }

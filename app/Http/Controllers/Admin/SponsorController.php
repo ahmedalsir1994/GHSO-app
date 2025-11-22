@@ -8,55 +8,58 @@ use Illuminate\Http\Request;
 
 class SponsorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return response()->json(Sponsor::all());
+        $sponsors = Sponsor::paginate(10);
+        return view('admin.sponsors.index', compact('sponsors'));
     }
 
+    public function create()
+    {
+        return view('admin.sponsors.create');
+    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
             'logo' => 'nullable|string',
-            'website' => 'nullable|string',
-            'category' => 'nullable|string',
-            'language' => 'nullable|string'
+            'website' => 'nullable|url',
+            'category' => 'nullable|string|max:255',
+            'language' => 'nullable|string|max:5'
         ]);
+
+        Sponsor::create($validated);
+        return redirect()->route('sponsors.index')->with('success', 'Sponsor created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Sponsor $sponsor)
     {
-        return $sponsor;
+        return view('admin.sponsors.show', compact('sponsor'));
     }
 
+    public function edit(Sponsor $sponsor)
+    {
+        return view('admin.sponsors.edit', compact('sponsor'));
+    }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Sponsor $sponsor)
     {
-        $sponsor->update($request->all());
-        return $sponsor;        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'logo' => 'nullable|string',
+            'website' => 'nullable|url',
+            'category' => 'nullable|string|max:255',
+            'language' => 'nullable|string|max:5'
+        ]);
+
+        $sponsor->update($validated);
+        return redirect()->route('sponsors.index')->with('success', 'Sponsor updated successfully');
     }
 
-  
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Sponsor $sponsor)
     {
         $sponsor->delete();
-        return response()->noContent();
+        return redirect()->route('sponsors.index')->with('success', 'Sponsor deleted successfully');
     }
 }

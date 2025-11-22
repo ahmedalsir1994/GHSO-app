@@ -8,56 +8,20 @@ use App\Models\ContactForm;
 
 class ContactController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $contacts = ContactForm::latest()->paginate(10);
+        return view('admin.contacts.index', compact('contacts'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-      public function store(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'subject' => 'nullable|string',
-            'message' => 'required|string'
-        ]); 
-        ContactForm::create($data);
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(ContactForm $contact)
     {
-        return $contact;
+        return view('admin.contacts.show', compact('contact'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, ContactForm $contact)
-    {
-        $contact->update($request->all());
-        return $contact;
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(ContactForm $contact)
     {
         $contact->delete();
-        return response()->noContent();
+        return redirect()->route('contacts.index')->with('success', 'Message deleted successfully');
     }
 }

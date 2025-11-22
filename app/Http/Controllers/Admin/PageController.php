@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Page;
 use Illuminate\Support\Str;
 
-
 class PageController extends Controller
 {
     public function index()
@@ -23,20 +22,25 @@ class PageController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'language' => 'nullable|string|max:5'
         ]);
 
         Page::create([
-            'title' => $request->input('title'),
-            'slug' => Str::slug($request->input('title')),
-            'content' => $request->input('content'),
-            'language' => $request->input('language') ?? 'en'
+            'title' => $validated['title'],
+            'slug' => Str::slug($validated['title']),
+            'content' => $validated['content'],
+            'language' => $validated['language'] ?? 'en'
         ]);
 
-        return redirect()->route('admin.pages.index')->with('success', 'Page created successfully.');
+        return redirect()->route('pages.index')->with('success', 'Page created successfully');
+    }
+
+    public function show(Page $page)
+    {
+        return view('admin.pages.show', compact('page'));
     }
 
     public function edit(Page $page)
@@ -46,24 +50,25 @@ class PageController extends Controller
 
     public function update(Request $request, Page $page)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
+            'language' => 'nullable|string|max:5'
         ]);
 
         $page->update([
-            'title' => $request->input('title'),
-            'slug' => Str::slug($request->input('title')),
-            'content' => $request->input('content'),
-            'language' => $request->input('language') ?? 'en'
+            'title' => $validated['title'],
+            'slug' => Str::slug($validated['title']),
+            'content' => $validated['content'],
+            'language' => $validated['language'] ?? 'en'
         ]);
 
-        return redirect()->route('admin.pages.index')->with('success', 'Page updated successfully.');
+        return redirect()->route('pages.index')->with('success', 'Page updated successfully');
     }
 
     public function destroy(Page $page)
     {
         $page->delete();
-        return redirect()->route('admin.pages.index')->with('success', 'Page deleted successfully.');
+        return redirect()->route('pages.index')->with('success', 'Page deleted successfully');
     }
 }
